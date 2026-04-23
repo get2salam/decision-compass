@@ -159,6 +159,74 @@ button {
   text-align: center;
 }
 
+.toast-host {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  z-index: 40;
+}
+
+.toast {
+  min-width: 220px;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--surface-edge);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-2);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success {
+  border-color: rgba(75, 138, 95, 0.28);
+}
+
+.shortcut-dialog {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.shortcut-dialog::backdrop {
+  background: rgba(47, 38, 29, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.shortcut-sheet {
+  width: min(520px, calc(100vw - 2rem));
+  padding: var(--space-5);
+}
+
+.shortcut-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.shortcut-list div {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--surface-edge);
+  background: var(--bg-soft);
+}
+
 @media (max-width: 900px) {
   .hero,
   .workspace {
@@ -167,5 +235,11 @@ button {
 
   .topbar {
     flex-wrap: wrap;
+  }
+
+  .toast-host {
+    right: var(--space-3);
+    left: var(--space-3);
+    bottom: var(--space-3);
   }
 }

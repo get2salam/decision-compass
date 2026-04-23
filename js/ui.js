@@ -1,3 +1,4 @@
+import { showToast } from "./feedback.js";
 import { exportMatrix, importMatrixFile } from "./io.js";
 import { actions, selectConfidence, selectRankedOptions, selectStats } from "./store.js";
 
@@ -166,14 +167,21 @@ export function bindUi() {
         decisionTitle: "My next decision",
         note: "Define the tradeoffs, then score each path honestly.",
       });
+      showToast("Started a fresh decision.", "success");
     }
 
     if (target.dataset.action === "export") {
       exportMatrix();
+      showToast("Downloaded a backup.", "success");
     }
 
     if (target.dataset.action === "import") {
       document.querySelector("#import-file")?.click();
+    }
+
+    if (target.dataset.action === "help") {
+      const { showShortcutHelp } = await import("./shortcuts.js");
+      showShortcutHelp();
     }
 
     if (target.dataset.action === "add-criterion") {
@@ -224,6 +232,7 @@ export function bindUi() {
     if (!file) return;
     try {
       await importMatrixFile(file);
+      showToast("Imported your backup.", "success");
     } catch (error) {
       window.alert(error instanceof Error ? error.message : "Import failed.");
     } finally {
