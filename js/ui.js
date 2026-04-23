@@ -1,3 +1,4 @@
+import { exportMatrix, importMatrixFile } from "./io.js";
 import { actions, selectConfidence, selectRankedOptions, selectStats } from "./store.js";
 
 const esc = (value = "") => String(value)
@@ -156,7 +157,7 @@ export function renderApp(state) {
 }
 
 export function bindUi() {
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     const target = event.target.closest("[data-action]");
     if (!target) return;
 
@@ -165,6 +166,14 @@ export function bindUi() {
         decisionTitle: "My next decision",
         note: "Define the tradeoffs, then score each path honestly.",
       });
+    }
+
+    if (target.dataset.action === "export") {
+      exportMatrix();
+    }
+
+    if (target.dataset.action === "import") {
+      document.querySelector("#import-file")?.click();
     }
 
     if (target.dataset.action === "add-criterion") {
@@ -184,7 +193,7 @@ export function bindUi() {
     }
   });
 
-  document.addEventListener("input", (event) => {
+  document.addEventListener("input", async (event) => {
     const { field, id, optionId, criterionId } = event.target.dataset || {};
     if (!field) return;
 
@@ -206,6 +215,19 @@ export function bindUi() {
 
     if (field === "score") {
       actions.setScore(optionId, criterionId, event.target.value);
+    }
+  });
+
+  document.addEventListener("change", async (event) => {
+    if (event.target.id !== "import-file") return;
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      await importMatrixFile(file);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Import failed.");
+    } finally {
+      event.target.value = "";
     }
   });
 }

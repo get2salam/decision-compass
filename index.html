@@ -20,8 +20,10 @@
           <p>Local-first weighted choices, without the noise.</p>
         </div>
         <div class="spacer"></div>
-        <button class="btn">Export</button>
+        <button class="btn" data-action="import">Import</button>
+        <button class="btn" data-action="export">Export</button>
         <button class="btn btn-primary" data-action="new-decision">New decision</button>
+        <input id="import-file" type="file" accept=".json,application/json" hidden />
       </header>
 
       <section class="hero">
@@ -55,21 +57,7 @@
         </aside>
       </section>
 
-      <section class="workspace" data-role="workspace">
-        <article class="panel card placeholder">
-          <div>
-            <h2>Criteria editor</h2>
-            <p>Your criteria controls will land here next.</p>
-          </div>
-        </article>
-        <article class="panel card placeholder">
-          <div>
-            <h2>Ranking board</h2>
-            <p>Option scoring and weighted totals are coming up.</p>
-          </div>
-        </article>
-      </section>
-
+      <section class="workspace" data-role="workspace"></section>
       <section class="results" data-role="results"></section>
     </main>
     <script type="module" src="./js/main.js"></script>
