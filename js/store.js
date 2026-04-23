@@ -110,6 +110,25 @@ export const actions = {
       ),
     });
   },
+  removeOption(id) {
+    const scores = { ...state.scores };
+    delete scores[id];
+    commit({
+      ...state,
+      options: state.options.filter((option) => option.id !== id),
+      scores,
+    });
+  },
+  setScore(optionId, criterionId, value) {
+    const next = {
+      ...state.scores,
+      [optionId]: {
+        ...(state.scores[optionId] || {}),
+        [criterionId]: Math.max(0, Math.min(10, Number(value) || 0)),
+      },
+    };
+    commit({ ...state, scores: next });
+  },
 };
 
 export function selectStats(input = state) {
@@ -117,4 +136,31 @@ export function selectStats(input = state) {
     options: input.options.length,
     criteria: input.criteria.length,
   };
+}
+
+export function selectOptionTotals(input = state) {
+  const weightTotal = input.criteria.reduce((sum, criterion) => sum + criterion.weight, 0) || 1;
+  return input.options.map((option) => {
+    const weightedScore = input.criteria.reduce((sum, criterion) => {
+      const raw = Number(input.scores?.[option.id]?.[criterion.id] || 0);
+      return sum + raw * criterion.weight;
+    }, 0);
+    const maxScore = weightTotal * 10;
+    const normalized = maxScore ? (weightedScore / maxScore) * 100 : 0;
+    return {
+      optionId: option.id,
+      weightedScore,
+      normalized,
+    };
+  });
+}
+
+export function selectRankedOptions(input = state) {
+  const totals = new Map(selectOptionTotals(input).map((item) => [item.optionId, item]));
+  return [...input.options]
+    .map((option) => ({
+      ...option,
+      ...(totals.get(option.id) || { weightedScore: 0, normalized: 0 }),
+    }))
+    .sort((a, b) => b.weightedScore - a.weightedScore || a.name.localeCompare(b.name));
 }

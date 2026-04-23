@@ -37,6 +37,10 @@
   border: 1px solid var(--surface-edge);
 }
 
+.option-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0)), var(--bg-soft);
+}
+
 .row-head {
   display: flex;
   align-items: center;
@@ -49,6 +53,25 @@
   grid-template-columns: 1fr 160px auto;
   gap: var(--space-3);
   align-items: end;
+}
+
+.option-meta {
+  grid-template-columns: 1fr 1.2fr auto;
+}
+
+.option-note textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.empty-inline {
+  color: var(--ink-faint);
 }
 
 label {

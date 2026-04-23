@@ -1,16 +1,22 @@
-import { actions, selectStats } from "./store.js";
+import { actions, selectRankedOptions, selectStats } from "./store.js";
+
+const esc = (value = "") => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;");
 
 function criterionRow(criterion) {
   return `
     <li class="stack-item">
       <div class="row-head">
-        <strong>${criterion.label}</strong>
+        <strong>${esc(criterion.label)}</strong>
         <button class="icon-btn" data-action="remove-criterion" data-id="${criterion.id}" type="button">✕</button>
       </div>
       <div class="field-row">
         <label>
           <span>Label</span>
-          <input type="text" value="${criterion.label}" data-field="criterion-label" data-id="${criterion.id}" />
+          <input type="text" value="${esc(criterion.label)}" data-field="criterion-label" data-id="${criterion.id}" />
         </label>
         <label>
           <span>Weight</span>
@@ -22,8 +28,48 @@ function criterionRow(criterion) {
   `;
 }
 
+function scoreField(optionId, criterion, value) {
+  return `
+    <label>
+      <span>${esc(criterion.label)}</span>
+      <input type="number" min="0" max="10" step="1" value="${value}" data-field="score" data-option-id="${optionId}" data-criterion-id="${criterion.id}" />
+    </label>
+  `;
+}
+
+function optionCard(option, state) {
+  const scoreMap = state.scores?.[option.id] || {};
+  const avg = state.criteria.length
+    ? Math.round((state.criteria.reduce((sum, criterion) => sum + Number(scoreMap[criterion.id] || 0), 0) / state.criteria.length) * 10) / 10
+    : 0;
+
+  return `
+    <li class="stack-item option-card">
+      <div class="row-head">
+        <strong>${esc(option.name)}</strong>
+        <button class="icon-btn" data-action="remove-option" data-id="${option.id}" type="button">✕</button>
+      </div>
+      <div class="field-row option-meta">
+        <label>
+          <span>Name</span>
+          <input type="text" value="${esc(option.name)}" data-field="option-name" data-id="${option.id}" />
+        </label>
+        <label class="option-note">
+          <span>Notes</span>
+          <textarea rows="2" data-field="option-note" data-id="${option.id}">${esc(option.note || "")}</textarea>
+        </label>
+        <span class="pill">Avg ${avg}/10</span>
+      </div>
+      <div class="score-grid">
+        ${state.criteria.length ? state.criteria.map((criterion) => scoreField(option.id, criterion, Number(scoreMap[criterion.id] || 0))).join("") : `<div class="empty-inline">Add criteria first, then score this option.</div>`}
+      </div>
+    </li>
+  `;
+}
+
 export function renderApp(state) {
   const stats = selectStats(state);
+  const ranked = selectRankedOptions(state);
   const titleEl = document.querySelector("[data-role='decision-title']");
   const noteEl = document.querySelector("[data-role='decision-note']");
   const optionsEl = document.querySelector("[data-role='options-count']");
@@ -52,11 +98,13 @@ export function renderApp(state) {
       <div class="panel-head">
         <div>
           <h2>Options</h2>
-          <p>Your ranked choices will appear here next.</p>
+          <p>${ranked.length ? `Leading option: ${esc(ranked[0].name)}` : "Add a few paths and start scoring them."}</p>
         </div>
-        <button class="btn" type="button" disabled>Add option</button>
+        <button class="btn btn-primary" type="button" data-action="add-option">Add option</button>
       </div>
-      <div class="placeholder compact">Option scoring lands in the next commit.</div>
+      <ul class="stack-list">
+        ${state.options.length ? state.options.map((option) => optionCard(option, state)).join("") : `<li class="empty-state">No options yet. Add at least two paths to compare.</li>`}
+      </ul>
     </article>
   `;
 }
@@ -80,11 +128,19 @@ export function bindUi() {
     if (target.dataset.action === "remove-criterion") {
       actions.removeCriterion(target.dataset.id);
     }
+
+    if (target.dataset.action === "add-option") {
+      actions.addOption({ name: `Option ${document.querySelectorAll("[data-field='option-name']").length + 1}` });
+    }
+
+    if (target.dataset.action === "remove-option") {
+      actions.removeOption(target.dataset.id);
+    }
   });
 
   document.addEventListener("input", (event) => {
-    const { field, id } = event.target.dataset || {};
-    if (!field || !id) return;
+    const { field, id, optionId, criterionId } = event.target.dataset || {};
+    if (!field) return;
 
     if (field === "criterion-label") {
       actions.updateCriterion(id, { label: event.target.value || "Untitled criterion" });
@@ -92,6 +148,18 @@ export function bindUi() {
 
     if (field === "criterion-weight") {
       actions.updateCriterion(id, { weight: Number(event.target.value) });
+    }
+
+    if (field === "option-name") {
+      actions.updateOption(id, { name: event.target.value || "Untitled option" });
+    }
+
+    if (field === "option-note") {
+      actions.updateOption(id, { note: event.target.value || "" });
+    }
+
+    if (field === "score") {
+      actions.setScore(optionId, criterionId, event.target.value);
     }
   });
 }
