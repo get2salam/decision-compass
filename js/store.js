@@ -41,12 +41,12 @@ export function hydrate(input = {}) {
   };
 }
 
-export function initStore() {
+export function initStore({ seed } = {}) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    state = raw ? hydrate(JSON.parse(raw)) : defaultState();
+    state = raw ? hydrate(JSON.parse(raw)) : hydrate(typeof seed === "function" ? seed() : defaultState());
   } catch {
-    state = defaultState();
+    state = hydrate(typeof seed === "function" ? seed() : defaultState());
   }
   emit();
 }
