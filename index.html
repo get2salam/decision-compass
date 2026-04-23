@@ -8,11 +8,66 @@
       name="description"
       content="A calm local-first decision matrix for weighted comparisons."
     />
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/app.css" />
   </head>
   <body>
-    <main>
-      <h1>Decision Compass</h1>
-      <p>Loading your decision workspace…</p>
+    <main class="shell">
+      <header class="topbar card">
+        <div class="brand">
+          <h1>Decision Compass</h1>
+          <p>Local-first weighted choices, without the noise.</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn">Export</button>
+        <button class="btn btn-primary">New decision</button>
+      </header>
+
+      <section class="hero">
+        <article class="hero-card card">
+          <h2>Compare options with calm, weighted clarity</h2>
+          <p>
+            Score your options against the criteria that matter, tune the weights,
+            and let the ranking update instantly.
+          </p>
+        </article>
+        <aside class="summary-card card">
+          <h2>At a glance</h2>
+          <div class="summary-stats">
+            <div class="stat">
+              <strong>0</strong>
+              <span>options</span>
+            </div>
+            <div class="stat">
+              <strong>0</strong>
+              <span>criteria</span>
+            </div>
+            <div class="stat">
+              <strong>0%</strong>
+              <span>confidence</span>
+            </div>
+            <div class="stat">
+              <strong>—</strong>
+              <span>best choice</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="workspace">
+        <article class="panel card placeholder">
+          <div>
+            <h2>Criteria editor</h2>
+            <p>Your criteria controls will land here next.</p>
+          </div>
+        </article>
+        <article class="panel card placeholder">
+          <div>
+            <h2>Ranking board</h2>
+            <p>Option scoring and weighted totals are coming up.</p>
+          </div>
+        </article>
+      </section>
     </main>
   </body>
 </html>
