@@ -20,13 +20,13 @@
         </div>
         <div class="spacer"></div>
         <button class="btn">Export</button>
-        <button class="btn btn-primary">New decision</button>
+        <button class="btn btn-primary" data-action="new-decision">New decision</button>
       </header>
 
       <section class="hero">
         <article class="hero-card card">
-          <h2>Compare options with calm, weighted clarity</h2>
-          <p>
+          <h2 data-role="decision-title">Compare options with calm, weighted clarity</h2>
+          <p data-role="decision-note">
             Score your options against the criteria that matter, tune the weights,
             and let the ranking update instantly.
           </p>
@@ -35,11 +35,11 @@
           <h2>At a glance</h2>
           <div class="summary-stats">
             <div class="stat">
-              <strong>0</strong>
+              <strong data-role="options-count">0</strong>
               <span>options</span>
             </div>
             <div class="stat">
-              <strong>0</strong>
+              <strong data-role="criteria-count">0</strong>
               <span>criteria</span>
             </div>
             <div class="stat">
@@ -54,7 +54,7 @@
         </aside>
       </section>
 
-      <section class="workspace">
+      <section class="workspace" data-role="workspace">
         <article class="panel card placeholder">
           <div>
             <h2>Criteria editor</h2>
@@ -69,5 +69,6 @@
         </article>
       </section>
     </main>
+    <script type="module" src="./js/main.js"></script>
   </body>
 </html>
