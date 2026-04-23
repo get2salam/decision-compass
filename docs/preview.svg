@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Decision Compass preview</title>
+  <desc id="desc">A calm weighted decision matrix with criteria, options, and a ranking board.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbf6ec"/>
+      <stop offset="100%" stop-color="#f1eadf"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#335c67"/>
+      <stop offset="100%" stop-color="#26464e"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <circle cx="805" cy="94" r="120" fill="#f2d8a6" opacity="0.6"/>
+  <rect x="48" y="38" width="864" height="76" rx="24" fill="#fffdf8" stroke="#ddd2c3"/>
+  <text x="84" y="86" font-family="Georgia, serif" font-size="30" fill="#2f261d">Decision Compass</text>
+  <text x="84" y="104" font-family="Arial, sans-serif" font-size="14" fill="#6d5d4d">Local-first weighted choices, without the noise.</text>
+
+  <rect x="48" y="144" width="548" height="132" rx="26" fill="#fffdf8" stroke="#ddd2c3"/>
+  <text x="80" y="194" font-family="Georgia, serif" font-size="32" fill="#2f261d">Compare options with calm clarity</text>
+  <text x="80" y="226" font-family="Arial, sans-serif" font-size="17" fill="#6d5d4d">Score each path, tune the weights, and let the strongest signal rise.</text>
+
+  <rect x="620" y="144" width="292" height="132" rx="26" fill="#fffdf8" stroke="#ddd2c3"/>
+  <text x="648" y="184" font-family="Arial, sans-serif" font-size="14" fill="#6d5d4d">AT A GLANCE</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="648" y="202" width="108" height="54" rx="16" fill="#f8f3ea" stroke="#ddd2c3"/>
+    <text x="666" y="228" font-size="24" fill="#2f261d">3</text>
+    <text x="666" y="246" font-size="13" fill="#6d5d4d">options</text>
+    <rect x="774" y="202" width="108" height="54" rx="16" fill="#f8f3ea" stroke="#ddd2c3"/>
+    <text x="792" y="228" font-size="24" fill="#2f261d">4</text>
+    <text x="792" y="246" font-size="13" fill="#6d5d4d">criteria</text>
+  </g>
+
+  <rect x="48" y="302" width="424" height="190" rx="26" fill="#fffdf8" stroke="#ddd2c3"/>
+  <text x="78" y="340" font-family="Georgia, serif" font-size="26" fill="#2f261d">Criteria</text>
+  <rect x="78" y="360" width="364" height="48" rx="18" fill="#f8f3ea" stroke="#ddd2c3"/>
+  <text x="98" y="390" font-family="Arial, sans-serif" font-size="16" fill="#2f261d">Long-term upside</text>
+  <rect x="78" y="420" width="364" height="48" rx="18" fill="#f8f3ea" stroke="#ddd2c3"/>
+  <text x="98" y="450" font-family="Arial, sans-serif" font-size="16" fill="#2f261d">Speed to execution</text>
+
+  <rect x="492" y="302" width="420" height="88" rx="26" fill="#fffdf8" stroke="#b9c8cc"/>
+  <text x="522" y="338" font-family="Georgia, serif" font-size="24" fill="#2f261d">1. Double down on the product</text>
+  <text x="522" y="364" font-family="Arial, sans-serif" font-size="15" fill="#6d5d4d">87% · strongest long-term score</text>
+  <rect x="492" y="404" width="420" height="88" rx="26" fill="#fffdf8" stroke="#ddd2c3"/>
+  <text x="522" y="440" font-family="Georgia, serif" font-size="24" fill="#2f261d">2. Hybrid split</text>
+  <text x="522" y="466" font-family="Arial, sans-serif" font-size="15" fill="#6d5d4d">78% · balanced across tradeoffs</text>
+
+  <circle cx="870" cy="72" r="24" fill="url(#brand)"/>
+  <path d="M870 55l4 12h13l-10 7 4 12-11-8-11 8 4-12-10-7h13z" fill="#fff7e9"/>
+</svg>
