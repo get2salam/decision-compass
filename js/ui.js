@@ -1,4 +1,4 @@
-import { actions, selectRankedOptions, selectStats } from "./store.js";
+import { actions, selectConfidence, selectRankedOptions, selectStats } from "./store.js";
 
 const esc = (value = "") => String(value)
   .replaceAll("&", "&amp;")
@@ -67,19 +67,63 @@ function optionCard(option, state) {
   `;
 }
 
+function resultsBoard(ranked) {
+  if (!ranked.length) {
+    return `
+      <article class="panel card placeholder compact">
+        <div>
+          <h2>Ranking board</h2>
+          <p>Your weighted results will appear here as soon as you add options.</p>
+        </div>
+      </article>
+    `;
+  }
+
+  return `
+    <article class="panel card stack">
+      <div class="panel-head">
+        <div>
+          <h2>Ranking board</h2>
+          <p>Weighted totals update instantly as you score each option.</p>
+        </div>
+      </div>
+      <div class="ranking-list">
+        ${ranked.map((option, index) => `
+          <div class="ranking-row ${index === 0 ? "ranking-top" : ""}">
+            <div>
+              <strong>${index + 1}. ${esc(option.name)}</strong>
+              <p>${esc(option.note || "No notes yet.")}</p>
+            </div>
+            <div class="ranking-score">
+              <strong>${Math.round(option.normalized)}%</strong>
+              <span>${option.weightedScore.toFixed(1)} weighted points</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
 export function renderApp(state) {
   const stats = selectStats(state);
   const ranked = selectRankedOptions(state);
+  const confidence = selectConfidence(state);
   const titleEl = document.querySelector("[data-role='decision-title']");
   const noteEl = document.querySelector("[data-role='decision-note']");
   const optionsEl = document.querySelector("[data-role='options-count']");
   const criteriaEl = document.querySelector("[data-role='criteria-count']");
+  const confidenceEl = document.querySelector("[data-role='confidence-score']");
+  const bestChoiceEl = document.querySelector("[data-role='best-choice']");
   const workspaceEl = document.querySelector("[data-role='workspace']");
+  const resultsEl = document.querySelector("[data-role='results']");
 
   titleEl.textContent = state.decisionTitle;
   noteEl.textContent = state.note || "Score your options against the criteria that matter, then follow the strongest signal.";
   optionsEl.textContent = String(stats.options);
   criteriaEl.textContent = String(stats.criteria);
+  confidenceEl.textContent = `${confidence}%`;
+  bestChoiceEl.textContent = ranked[0]?.name || "—";
 
   workspaceEl.innerHTML = `
     <article class="panel card stack">
@@ -107,6 +151,8 @@ export function renderApp(state) {
       </ul>
     </article>
   `;
+
+  resultsEl.innerHTML = resultsBoard(ranked);
 }
 
 export function bindUi() {

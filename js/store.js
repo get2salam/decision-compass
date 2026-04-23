@@ -164,3 +164,10 @@ export function selectRankedOptions(input = state) {
     }))
     .sort((a, b) => b.weightedScore - a.weightedScore || a.name.localeCompare(b.name));
 }
+
+export function selectConfidence(input = state) {
+  const ranked = selectRankedOptions(input);
+  if (!ranked.length) return 0;
+  if (ranked.length === 1) return Math.round(ranked[0].normalized);
+  return Math.max(0, Math.min(100, Math.round(ranked[0].normalized - ranked[1].normalized + 50)));
+}
