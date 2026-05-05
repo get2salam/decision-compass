@@ -13,13 +13,24 @@ export function exportMatrix() {
   const link = document.createElement("a");
   link.href = url;
   link.download = `decision-compass-${new Date().toISOString().slice(0, 10)}.json`;
+  link.rel = "noopener";
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function importMatrixFile(file) {
   const text = await file.text();
-  const parsed = JSON.parse(text);
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error("That file isn't valid JSON.");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("That file is not a Decision Compass backup.");
+  }
   if (parsed.schema !== SCHEMA) {
     throw new Error("That file is not a Decision Compass backup.");
   }
