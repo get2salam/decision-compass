@@ -36,6 +36,31 @@ export function normalizeOption(input = {}) {
   };
 }
 
+export function clampScore(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(10, n));
+}
+
+export function normalizeScores(rawScores, options, criteria) {
+  if (!rawScores || typeof rawScores !== "object") return {};
+  const optionIds = new Set(options.map((option) => option.id));
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id));
+  const result = {};
+  for (const optionId of Object.keys(rawScores)) {
+    if (!optionIds.has(optionId)) continue;
+    const row = rawScores[optionId];
+    if (!row || typeof row !== "object") continue;
+    const cleaned = {};
+    for (const criterionId of Object.keys(row)) {
+      if (!criterionIds.has(criterionId)) continue;
+      cleaned[criterionId] = clampScore(row[criterionId]);
+    }
+    result[optionId] = cleaned;
+  }
+  return result;
+}
+
 export function touch(state) {
   return {
     ...state,

@@ -1,7 +1,9 @@
 import {
+  clampScore,
   defaultState,
   normalizeCriterion,
   normalizeOption,
+  normalizeScores,
   STORAGE_KEY,
   touch,
 } from "./model.js";
@@ -24,12 +26,14 @@ function commit(next) {
 }
 
 export function hydrate(input = {}) {
+  const criteria = Array.isArray(input.criteria) ? input.criteria.map(normalizeCriterion) : [];
+  const options = Array.isArray(input.options) ? input.options.map(normalizeOption) : [];
   return {
     ...defaultState(),
     ...input,
-    criteria: Array.isArray(input.criteria) ? input.criteria.map(normalizeCriterion) : [],
-    options: Array.isArray(input.options) ? input.options.map(normalizeOption) : [],
-    scores: input.scores && typeof input.scores === "object" ? input.scores : {},
+    criteria,
+    options,
+    scores: normalizeScores(input.scores, options, criteria),
     ui: {
       ...defaultState().ui,
       ...(input.ui || {}),
@@ -124,7 +128,7 @@ export const actions = {
       ...state.scores,
       [optionId]: {
         ...(state.scores[optionId] || {}),
-        [criterionId]: Math.max(0, Math.min(10, Number(value) || 0)),
+        [criterionId]: clampScore(value),
       },
     };
     commit({ ...state, scores: next });
