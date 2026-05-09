@@ -9,14 +9,15 @@ function buildHelpDialog() {
   if (helpDialog) return helpDialog;
   helpDialog = document.createElement("dialog");
   helpDialog.className = "shortcut-dialog";
+  helpDialog.setAttribute("aria-labelledby", "shortcut-dialog-title");
   helpDialog.innerHTML = `
     <form method="dialog" class="shortcut-sheet card">
       <div class="panel-head">
         <div>
-          <h2>Keyboard shortcuts</h2>
+          <h2 id="shortcut-dialog-title">Keyboard shortcuts</h2>
           <p>Keep the decision flow moving.</p>
         </div>
-        <button class="icon-btn" value="close">✕</button>
+        <button class="icon-btn" value="close" aria-label="Close shortcuts">✕</button>
       </div>
       <div class="shortcut-list">
         <div><kbd>N</kbd><span>New decision</span></div>

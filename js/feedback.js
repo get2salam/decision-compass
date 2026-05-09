@@ -4,7 +4,9 @@ function getHost() {
   if (host?.isConnected) return host;
   host = document.createElement("div");
   host.className = "toast-host";
+  host.setAttribute("role", "status");
   host.setAttribute("aria-live", "polite");
+  host.setAttribute("aria-label", "Notifications");
   document.body.appendChild(host);
   return host;
 }

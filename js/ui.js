@@ -13,7 +13,7 @@ function criterionRow(criterion) {
     <li class="stack-item">
       <div class="row-head">
         <strong>${esc(criterion.label)}</strong>
-        <button class="icon-btn" data-action="remove-criterion" data-id="${criterion.id}" type="button">✕</button>
+        <button class="icon-btn" data-action="remove-criterion" data-id="${criterion.id}" type="button" aria-label="Remove criterion ${esc(criterion.label)}">✕</button>
       </div>
       <div class="field-row">
         <label>
@@ -30,11 +30,11 @@ function criterionRow(criterion) {
   `;
 }
 
-function scoreField(optionId, criterion, value) {
+function scoreField(optionId, optionName, criterion, value) {
   return `
     <label>
       <span>${esc(criterion.label)}</span>
-      <input type="number" min="0" max="10" step="1" value="${value}" data-field="score" data-option-id="${optionId}" data-criterion-id="${criterion.id}" />
+      <input type="number" min="0" max="10" step="1" value="${value}" data-field="score" data-option-id="${optionId}" data-criterion-id="${criterion.id}" aria-label="${esc(optionName)} — ${esc(criterion.label)} score (0 to 10)" />
     </label>
   `;
 }
@@ -49,7 +49,7 @@ function optionCard(option, state) {
     <li class="stack-item option-card">
       <div class="row-head">
         <strong>${esc(option.name)}</strong>
-        <button class="icon-btn" data-action="remove-option" data-id="${option.id}" type="button">✕</button>
+        <button class="icon-btn" data-action="remove-option" data-id="${option.id}" type="button" aria-label="Remove option ${esc(option.name)}">✕</button>
       </div>
       <div class="field-row option-meta">
         <label>
@@ -63,7 +63,7 @@ function optionCard(option, state) {
         <span class="pill">Avg ${avg}/10</span>
       </div>
       <div class="score-grid">
-        ${state.criteria.length ? state.criteria.map((criterion) => scoreField(option.id, criterion, Number(scoreMap[criterion.id] || 0))).join("") : `<div class="empty-inline">Add criteria first, then score this option.</div>`}
+        ${state.criteria.length ? state.criteria.map((criterion) => scoreField(option.id, option.name, criterion, Number(scoreMap[criterion.id] || 0))).join("") : `<div class="empty-inline">Add criteria first, then score this option.</div>`}
       </div>
     </li>
   `;
