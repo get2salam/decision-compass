@@ -20,8 +20,7 @@ export function exportMatrix() {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-export async function importMatrixFile(file) {
-  const text = await file.text();
+export function parseBackup(text) {
   let parsed;
   try {
     parsed = JSON.parse(text);
@@ -34,5 +33,10 @@ export async function importMatrixFile(file) {
   if (parsed.schema !== SCHEMA) {
     throw new Error("That file is not a Decision Compass backup.");
   }
-  actions.replaceAll(parsed);
+  return parsed;
+}
+
+export async function importMatrixFile(file) {
+  const text = await file.text();
+  actions.replaceAll(parseBackup(text));
 }
