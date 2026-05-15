@@ -37,6 +37,18 @@ test("normalizeOption preserves provided id and trims name", () => {
   assert.equal(o.note, "");
 });
 
+test("normalizeCriterion falls back to defaults for non-string labels", () => {
+  assert.equal(normalizeCriterion({ label: 42 }).label, "New criterion");
+  assert.equal(normalizeCriterion({ label: null }).label, "New criterion");
+  assert.equal(normalizeCriterion({ label: "   " }).label, "New criterion");
+});
+
+test("normalizeOption coerces non-string name and note safely", () => {
+  const o = normalizeOption({ name: 7, note: 99 });
+  assert.equal(o.name, "New option");
+  assert.equal(o.note, "");
+});
+
 test("normalizeScores drops unknown options and criteria", () => {
   const options = [{ id: "opt_a", name: "A", note: "" }];
   const criteria = [{ id: "crit_x", label: "X", weight: 5 }];

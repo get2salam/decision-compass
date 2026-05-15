@@ -21,18 +21,20 @@ export function uid(prefix) {
 }
 
 export function normalizeCriterion(input = {}) {
+  const label = typeof input.label === "string" ? input.label.trim() : "";
   return {
     id: input.id || uid("crit"),
-    label: (input.label || "New criterion").trim(),
+    label: label || "New criterion",
     weight: Number.isFinite(input.weight) ? Math.max(1, Math.min(10, input.weight)) : 5,
   };
 }
 
 export function normalizeOption(input = {}) {
+  const name = typeof input.name === "string" ? input.name.trim() : "";
   return {
     id: input.id || uid("opt"),
-    name: (input.name || "New option").trim(),
-    note: input.note || "",
+    name: name || "New option",
+    note: typeof input.note === "string" ? input.note : "",
   };
 }
 
