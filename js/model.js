@@ -20,12 +20,19 @@ export function uid(prefix) {
   return `${prefix}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+export function clampWeight(value) {
+  if (value === null || value === undefined || value === "") return 5;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 5;
+  return Math.max(1, Math.min(10, n));
+}
+
 export function normalizeCriterion(input = {}) {
   const label = typeof input.label === "string" ? input.label.trim() : "";
   return {
     id: input.id || uid("crit"),
     label: label || "New criterion",
-    weight: Number.isFinite(input.weight) ? Math.max(1, Math.min(10, input.weight)) : 5,
+    weight: clampWeight(input.weight),
   };
 }
 

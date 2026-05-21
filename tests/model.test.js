@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   clampScore,
+  clampWeight,
   normalizeCriterion,
   normalizeOption,
   normalizeScores,
@@ -28,6 +29,26 @@ test("normalizeCriterion fills defaults and clamps weight", () => {
   const fallback = normalizeCriterion({});
   assert.equal(fallback.label, "New criterion");
   assert.equal(fallback.weight, 5);
+});
+
+test("clampWeight defaults to 5 for missing or non-numeric input", () => {
+  assert.equal(clampWeight(undefined), 5);
+  assert.equal(clampWeight(null), 5);
+  assert.equal(clampWeight(""), 5);
+  assert.equal(clampWeight("not a number"), 5);
+  assert.equal(clampWeight(NaN), 5);
+});
+
+test("clampWeight coerces numeric strings and clamps to 1..10", () => {
+  assert.equal(clampWeight("7"), 7);
+  assert.equal(clampWeight("0"), 1);
+  assert.equal(clampWeight("42"), 10);
+  assert.equal(clampWeight(-3), 1);
+});
+
+test("normalizeCriterion accepts numeric string weights from hand-edited backups", () => {
+  assert.equal(normalizeCriterion({ weight: "8" }).weight, 8);
+  assert.equal(normalizeCriterion({ weight: "0" }).weight, 1);
 });
 
 test("normalizeOption preserves provided id and trims name", () => {
