@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   assessCoverage,
   buildRecommendation,
+  planNextSteps,
   scoreDecisionQuality,
 } from "../js/agent.js";
 import { requiresEscalation, requiresAudit, getThresholds } from "../js/thresholds.js";
@@ -107,6 +108,38 @@ test("requiresAudit returns true when coverage is low but not critical", () => {
 test("requiresAudit returns false for high-confidence recommendations", () => {
   const rec = { confidence: 80, quality: 85, coverage: 0.95 };
   assert.equal(requiresAudit(rec), false);
+});
+
+test("planNextSteps returns empty array when all cells are filled", () => {
+  assert.deepEqual(planNextSteps(FULL_STATE), []);
+});
+
+test("planNextSteps returns empty array for a state with no criteria or options", () => {
+  assert.deepEqual(planNextSteps({ criteria: [], options: [], scores: {} }), []);
+});
+
+test("planNextSteps returns one step per missing cell", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7 }, o2: {} } };
+  assert.equal(planNextSteps(partial).length, 3);
+});
+
+test("planNextSteps orders steps by descending criterion weight", () => {
+  const steps = planNextSteps({ ...FULL_STATE, scores: {} });
+  for (let i = 1; i < steps.length; i++) {
+    assert.ok(steps[i - 1].weight >= steps[i].weight, "steps not sorted by weight");
+  }
+});
+
+test("planNextSteps step objects include all required orchestration fields", () => {
+  const [step] = planNextSteps({ ...FULL_STATE, scores: { o1: {}, o2: {} } });
+  for (const field of ["optionId", "optionName", "criterionId", "criterionLabel", "weight", "rationale"]) {
+    assert.ok(field in step, `missing field: ${field}`);
+  }
+});
+
+test("planNextSteps treats a score of 0 as filled, not empty", () => {
+  const withZero = { ...FULL_STATE, scores: { o1: { c1: 0, c2: 0 }, o2: { c1: 0, c2: 0 } } };
+  assert.deepEqual(planNextSteps(withZero), []);
 });
 
 test("getThresholds returns configuration object with all threshold values", () => {

@@ -38,6 +38,30 @@ export function scoreDecisionQuality(state) {
   );
 }
 
+// Returns an ordered list of empty score cells to fill, ranked by criterion
+// weight so an orchestration loop can direct the user toward the highest-impact
+// gaps first.
+export function planNextSteps(state) {
+  const { criteria = [], options = [], scores = {} } = state;
+  const steps = [];
+  for (const criterion of criteria) {
+    for (const option of options) {
+      const row = scores[option.id] ?? {};
+      if (row[criterion.id] == null) {
+        steps.push({
+          optionId: option.id,
+          optionName: option.name,
+          criterionId: criterion.id,
+          criterionLabel: criterion.label,
+          weight: criterion.weight,
+          rationale: `Score "${option.name}" on "${criterion.label}" (weight ${criterion.weight}/10) to improve coverage.`,
+        });
+      }
+    }
+  }
+  return steps.sort((a, b) => b.weight - a.weight);
+}
+
 export function buildRecommendation(state) {
   const { criteria, options } = state;
   const reasoning = [];
