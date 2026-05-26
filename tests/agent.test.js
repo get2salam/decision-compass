@@ -7,7 +7,12 @@ import {
   planNextSteps,
   scoreDecisionQuality,
 } from "../js/agent.js";
-import { requiresEscalation, requiresAudit, getThresholds } from "../js/thresholds.js";
+import {
+  requiresEscalation,
+  requiresAudit,
+  getThresholds,
+  summarizeRecommendation,
+} from "../js/thresholds.js";
 
 const CRITERIA = [
   { id: "c1", label: "Salary", weight: 9 },
@@ -156,6 +161,29 @@ test("planNextSteps step objects include all required orchestration fields", () 
 test("planNextSteps treats a score of 0 as filled, not empty", () => {
   const withZero = { ...FULL_STATE, scores: { o1: { c1: 0, c2: 0 }, o2: { c1: 0, c2: 0 } } };
   assert.deepEqual(planNextSteps(withZero), []);
+});
+
+test("summarizeRecommendation returns status=escalate when coverage is critically low", () => {
+  const summary = summarizeRecommendation({ confidence: 60, quality: 60, coverage: 0.3 });
+  assert.equal(summary.status, "escalate");
+  assert.match(summary.reason, /coverage/);
+});
+
+test("summarizeRecommendation returns status=audit for borderline confidence", () => {
+  const summary = summarizeRecommendation({ confidence: 55, quality: 60, coverage: 0.85 });
+  assert.equal(summary.status, "audit");
+});
+
+test("summarizeRecommendation returns status=ready for a high-quality recommendation", () => {
+  const summary = summarizeRecommendation({ confidence: 80, quality: 85, coverage: 0.95 });
+  assert.equal(summary.status, "ready");
+  assert.equal(summary.label, "Ready to act");
+});
+
+test("summarizeRecommendation flows cleanly from buildRecommendation output", () => {
+  const summary = summarizeRecommendation(buildRecommendation(FULL_STATE));
+  assert.ok(["ready", "audit", "escalate"].includes(summary.status));
+  assert.equal(typeof summary.reason, "string");
 });
 
 test("getThresholds returns configuration object with all threshold values", () => {

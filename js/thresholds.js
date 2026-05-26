@@ -34,3 +34,35 @@ export function requiresAudit(recommendation) {
 export function getThresholds() {
   return { ...THRESHOLDS };
 }
+
+// Collapses requiresEscalation/requiresAudit into a single dispatch value so
+// callers (UI banners, orchestration loops) can switch on `status` rather than
+// re-running both checks. The `reason` string explains which threshold tripped.
+export function summarizeRecommendation(recommendation) {
+  const coverage = recommendation.coverage ?? 0;
+  const { confidence, quality } = recommendation;
+
+  if (requiresEscalation(recommendation)) {
+    const reasons = [];
+    if (coverage < THRESHOLDS.COVERAGE_CRITICAL)
+      reasons.push(`coverage ${Math.round(coverage * 100)}% below ${THRESHOLDS.COVERAGE_CRITICAL * 100}%`);
+    if (confidence < THRESHOLDS.CONFIDENCE_CRITICAL)
+      reasons.push(`confidence ${confidence} below ${THRESHOLDS.CONFIDENCE_CRITICAL}`);
+    if (quality < 40) reasons.push(`quality ${quality} below 40`);
+    return { status: "escalate", label: "Escalate for human review", reason: reasons.join("; ") };
+  }
+
+  if (requiresAudit(recommendation)) {
+    return {
+      status: "audit",
+      label: "Log for audit",
+      reason: "Borderline coverage, confidence, or quality — record for later review.",
+    };
+  }
+
+  return {
+    status: "ready",
+    label: "Ready to act",
+    reason: "Coverage, confidence, and quality are within healthy thresholds.",
+  };
+}
