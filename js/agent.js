@@ -68,11 +68,11 @@ export function buildRecommendation(state) {
 
   if (!criteria.length) {
     reasoning.push("No criteria defined — add at least one weighted criterion.");
-    return { recommendation: null, confidence: 0, quality: 0, reasoning, ready: false };
+    return { recommendation: null, confidence: 0, quality: 0, coverage: 0, reasoning, ready: false };
   }
   if (!options.length) {
     reasoning.push("No options defined — add at least two options to compare.");
-    return { recommendation: null, confidence: 0, quality: 0, reasoning, ready: false };
+    return { recommendation: null, confidence: 0, quality: 0, coverage: 0, reasoning, ready: false };
   }
 
   const coverage = assessCoverage(state);
@@ -101,6 +101,7 @@ export function buildRecommendation(state) {
     recommendation: ready ? top.name : null,
     confidence,
     quality: scoreDecisionQuality(state),
+    coverage,
     reasoning,
     ready,
   };

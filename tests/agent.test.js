@@ -80,6 +80,22 @@ test("buildRecommendation reasoning steps mention the highest-weight criterion l
   assert.ok(buildRecommendation(FULL_STATE).reasoning.some((s) => s.includes("Salary")));
 });
 
+test("buildRecommendation exposes coverage so it can be piped into threshold checks", () => {
+  const r = buildRecommendation(FULL_STATE);
+  assert.equal(r.coverage, 1);
+  const empty = buildRecommendation({ criteria: [], options: [], scores: {} });
+  assert.equal(empty.coverage, 0);
+});
+
+test("buildRecommendation output flows cleanly into requiresEscalation/requiresAudit", () => {
+  // Regression: previously buildRecommendation omitted `coverage`, so threshold
+  // checks defaulted it to 0 and always escalated even for ready recommendations.
+  const ready = buildRecommendation(FULL_STATE);
+  assert.equal(requiresEscalation(ready), false);
+  const sparse = buildRecommendation({ ...FULL_STATE, scores: { o1: { c1: 7 }, o2: {} } });
+  assert.equal(requiresEscalation(sparse), true);
+});
+
 test("requiresEscalation returns true when coverage is critically low", () => {
   const rec = { confidence: 60, quality: 50, coverage: 0.4 };
   assert.equal(requiresEscalation(rec), true);
