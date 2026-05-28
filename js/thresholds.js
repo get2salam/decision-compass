@@ -7,6 +7,8 @@ const THRESHOLDS = {
   CONFIDENCE_CRITICAL: 30,   // Below this: high uncertainty, always escalate
   CONFIDENCE_LOW: 50,        // Below this: borderline, audit required
   CONFIDENCE_HIGH: 70,       // At or above: high confidence, no escalation
+  QUALITY_CRITICAL: 40,      // Below this: poor decision quality, always escalate
+  QUALITY_LOW: 60,           // Below this (and above critical): audit required
 };
 
 export function requiresEscalation(recommendation) {
@@ -16,7 +18,7 @@ export function requiresEscalation(recommendation) {
   return (
     coverage < THRESHOLDS.COVERAGE_CRITICAL ||
     confidence < THRESHOLDS.CONFIDENCE_CRITICAL ||
-    quality < 40
+    quality < THRESHOLDS.QUALITY_CRITICAL
   );
 }
 
@@ -27,7 +29,7 @@ export function requiresAudit(recommendation) {
   return (
     coverage < THRESHOLDS.COVERAGE_LOW ||
     (confidence >= THRESHOLDS.CONFIDENCE_LOW && confidence < THRESHOLDS.CONFIDENCE_HIGH) ||
-    (quality >= 40 && quality < 60)
+    (quality >= THRESHOLDS.QUALITY_CRITICAL && quality < THRESHOLDS.QUALITY_LOW)
   );
 }
 
@@ -48,16 +50,20 @@ export function summarizeRecommendation(recommendation) {
       reasons.push(`coverage ${Math.round(coverage * 100)}% below ${THRESHOLDS.COVERAGE_CRITICAL * 100}%`);
     if (confidence < THRESHOLDS.CONFIDENCE_CRITICAL)
       reasons.push(`confidence ${confidence} below ${THRESHOLDS.CONFIDENCE_CRITICAL}`);
-    if (quality < 40) reasons.push(`quality ${quality} below 40`);
+    if (quality < THRESHOLDS.QUALITY_CRITICAL)
+      reasons.push(`quality ${quality} below ${THRESHOLDS.QUALITY_CRITICAL}`);
     return { status: "escalate", label: "Escalate for human review", reason: reasons.join("; ") };
   }
 
   if (requiresAudit(recommendation)) {
-    return {
-      status: "audit",
-      label: "Log for audit",
-      reason: "Borderline coverage, confidence, or quality — record for later review.",
-    };
+    const reasons = [];
+    if (coverage < THRESHOLDS.COVERAGE_LOW)
+      reasons.push(`coverage ${Math.round(coverage * 100)}% below ${THRESHOLDS.COVERAGE_LOW * 100}%`);
+    if (confidence >= THRESHOLDS.CONFIDENCE_LOW && confidence < THRESHOLDS.CONFIDENCE_HIGH)
+      reasons.push(`confidence ${confidence} in borderline band ${THRESHOLDS.CONFIDENCE_LOW}–${THRESHOLDS.CONFIDENCE_HIGH}`);
+    if (quality >= THRESHOLDS.QUALITY_CRITICAL && quality < THRESHOLDS.QUALITY_LOW)
+      reasons.push(`quality ${quality} in borderline band ${THRESHOLDS.QUALITY_CRITICAL}–${THRESHOLDS.QUALITY_LOW}`);
+    return { status: "audit", label: "Log for audit", reason: reasons.join("; ") };
   }
 
   return {

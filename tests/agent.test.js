@@ -174,6 +174,18 @@ test("summarizeRecommendation returns status=audit for borderline confidence", (
   assert.equal(summary.status, "audit");
 });
 
+test("summarizeRecommendation audit reason names the tripped threshold", () => {
+  const summary = summarizeRecommendation({ confidence: 55, quality: 60, coverage: 0.85 });
+  assert.match(summary.reason, /confidence 55/);
+});
+
+test("summarizeRecommendation audit reason lists every tripped threshold", () => {
+  const summary = summarizeRecommendation({ confidence: 55, quality: 50, coverage: 0.7 });
+  assert.match(summary.reason, /coverage/);
+  assert.match(summary.reason, /confidence/);
+  assert.match(summary.reason, /quality/);
+});
+
 test("summarizeRecommendation returns status=ready for a high-quality recommendation", () => {
   const summary = summarizeRecommendation({ confidence: 80, quality: 85, coverage: 0.95 });
   assert.equal(summary.status, "ready");
@@ -191,5 +203,7 @@ test("getThresholds returns configuration object with all threshold values", () 
   assert.ok(thresholds.COVERAGE_CRITICAL);
   assert.ok(thresholds.CONFIDENCE_CRITICAL);
   assert.equal(typeof thresholds.COVERAGE_LOW, "number");
+  assert.equal(thresholds.QUALITY_CRITICAL, 40);
+  assert.equal(thresholds.QUALITY_LOW, 60);
 });
 
