@@ -12,6 +12,7 @@ Decision Compass helps you think clearly when you're choosing between offers, to
 - Criteria editor with adjustable weights
 - Option cards with notes and per-criterion scores
 - Confidence and best-choice summary at the top
+- Recommendation agent that explains its reasoning and flags low-coverage decisions for human review
 - Thoughtful first-run sample matrix
 - Import and export JSON backups
 - Keyboard shortcuts and lightweight toast feedback
@@ -77,9 +78,27 @@ decision-compass/
     io.js
     feedback.js
     shortcuts.js
+    agent.js
+    thresholds.js
+  tests/
+    agent.test.js
+    hydrate.test.js
+    io.test.js
+    model.test.js
+    store.test.js
   docs/
     preview.svg
 ```
+
+## Testing
+
+The test suite runs on the Node.js built-in test runner — no dependencies to install:
+
+```bash
+npm test
+```
+
+Tests cover the pure logic in `js/` (store selectors, hydration, IO parsing, and the recommendation agent). Browser/UI code is verified by running the app locally.
 
 ## Privacy
 
