@@ -163,6 +163,22 @@ test("planNextSteps treats a score of 0 as filled, not empty", () => {
   assert.deepEqual(planNextSteps(withZero), []);
 });
 
+test("planNextSteps respects limit and keeps the highest-weight gaps", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  const top = planNextSteps(empty, { limit: 2 });
+  assert.equal(top.length, 2);
+  assert.ok(top.every((step) => step.criterionId === "c1"));
+});
+
+test("planNextSteps with limit=0 returns an empty list", () => {
+  assert.deepEqual(planNextSteps({ ...FULL_STATE, scores: {} }, { limit: 0 }), []);
+});
+
+test("planNextSteps with a limit larger than the backlog returns every gap", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7 }, o2: {} } };
+  assert.equal(planNextSteps(partial, { limit: 99 }).length, 3);
+});
+
 test("summarizeRecommendation returns status=escalate when coverage is critically low", () => {
   const summary = summarizeRecommendation({ confidence: 60, quality: 60, coverage: 0.3 });
   assert.equal(summary.status, "escalate");

@@ -40,8 +40,9 @@ export function scoreDecisionQuality(state) {
 
 // Returns an ordered list of empty score cells to fill, ranked by criterion
 // weight so an orchestration loop can direct the user toward the highest-impact
-// gaps first.
-export function planNextSteps(state) {
+// gaps first. Pass `limit` to cap the result — useful when a loop only wants
+// the next N actions rather than the full backlog.
+export function planNextSteps(state, { limit } = {}) {
   const { criteria = [], options = [], scores = {} } = state;
   const steps = [];
   for (const criterion of criteria) {
@@ -59,7 +60,9 @@ export function planNextSteps(state) {
       }
     }
   }
-  return steps.sort((a, b) => b.weight - a.weight);
+  steps.sort((a, b) => b.weight - a.weight);
+  if (typeof limit === "number" && limit >= 0) return steps.slice(0, limit);
+  return steps;
 }
 
 export function buildRecommendation(state) {
