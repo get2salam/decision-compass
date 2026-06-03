@@ -5,6 +5,7 @@ import {
   assessCoverage,
   buildRecommendation,
   coverageBreakdown,
+  findCloseContenders,
   planNextSteps,
   scoreDecisionQuality,
 } from "../js/agent.js";
@@ -240,6 +241,35 @@ test("coverageBreakdown sorts byCriterion by descending weight", () => {
   const { byCriterion } = coverageBreakdown(FULL_STATE);
   for (let i = 1; i < byCriterion.length; i++) {
     assert.ok(byCriterion[i - 1].weight >= byCriterion[i].weight);
+  }
+});
+
+test("findCloseContenders returns empty array for a state with fewer than two options", () => {
+  assert.deepEqual(findCloseContenders({ criteria: [], options: [], scores: {} }), []);
+  const single = { ...FULL_STATE, options: [OPTIONS[0]], scores: { o1: { c1: 7, c2: 9 } } };
+  assert.deepEqual(findCloseContenders(single), []);
+});
+
+test("findCloseContenders skips pairs whose gap exceeds the threshold", () => {
+  // Startup totals 108, BigCo totals 97 → normalized gap ~7.9 points, above default 5.
+  assert.deepEqual(findCloseContenders(FULL_STATE), []);
+});
+
+test("findCloseContenders flags adjacent pairs within the threshold", () => {
+  const tight = { ...FULL_STATE, scores: { o1: { c1: 8, c2: 8 }, o2: { c1: 8, c2: 7 } } };
+  const pairs = findCloseContenders(tight);
+  assert.equal(pairs.length, 1);
+  assert.equal(pairs[0].leaderName, "Startup");
+  assert.equal(pairs[0].challengerName, "BigCo");
+  assert.ok(pairs[0].gap <= 5);
+});
+
+test("findCloseContenders respects a custom threshold and returns rank metadata", () => {
+  const pairs = findCloseContenders(FULL_STATE, { threshold: 10 });
+  assert.equal(pairs.length, 1);
+  assert.equal(pairs[0].rank, 1);
+  for (const field of ["leaderId", "leaderName", "challengerId", "challengerName", "gap", "rank"]) {
+    assert.ok(field in pairs[0], `missing field: ${field}`);
   }
 });
 

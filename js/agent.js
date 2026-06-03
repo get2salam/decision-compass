@@ -72,6 +72,30 @@ export function scoreDecisionQuality(state) {
   );
 }
 
+// Returns adjacent option pairs whose normalized scores are within `threshold`
+// percentage points — useful for an orchestration loop to flag "too close to
+// call" matchups that would benefit from sharper differentiating criteria.
+// Pairs are returned in rank order, so the most impactful tie-break (the one
+// between the leader and runner-up) appears first.
+export function findCloseContenders(state, { threshold = 5 } = {}) {
+  const ranked = selectRankedOptions(state);
+  const pairs = [];
+  for (let i = 1; i < ranked.length; i++) {
+    const gap = ranked[i - 1].normalized - ranked[i].normalized;
+    if (gap <= threshold) {
+      pairs.push({
+        leaderId: ranked[i - 1].id,
+        leaderName: ranked[i - 1].name,
+        challengerId: ranked[i].id,
+        challengerName: ranked[i].name,
+        gap: Number(gap.toFixed(2)),
+        rank: i,
+      });
+    }
+  }
+  return pairs;
+}
+
 // Returns an ordered list of empty score cells to fill, ranked by criterion
 // weight so an orchestration loop can direct the user toward the highest-impact
 // gaps first. Pass `limit` to cap the result — useful when a loop only wants
