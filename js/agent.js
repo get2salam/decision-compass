@@ -15,6 +15,40 @@ export function assessCoverage(state) {
   return filled / (options.length * criteria.length);
 }
 
+// Per-option and per-criterion coverage stats. Complements assessCoverage by
+// surfacing *where* the gaps are, so a UI can show progress per row/column and
+// an orchestration loop can target a specific option or criterion instead of
+// walking the flat planNextSteps list. byCriterion is sorted by weight desc so
+// the highest-impact gaps are easy to find first.
+export function coverageBreakdown(state) {
+  const { criteria = [], options = [], scores = {} } = state;
+  const byOption = options.map((opt) => {
+    const row = scores[opt.id] ?? {};
+    const filled = criteria.filter((c) => row[c.id] != null).length;
+    return {
+      optionId: opt.id,
+      optionName: opt.name,
+      filled,
+      total: criteria.length,
+      ratio: criteria.length ? filled / criteria.length : 0,
+    };
+  });
+  const byCriterion = criteria
+    .map((c) => {
+      const filled = options.filter((opt) => (scores[opt.id] ?? {})[c.id] != null).length;
+      return {
+        criterionId: c.id,
+        criterionLabel: c.label,
+        weight: c.weight,
+        filled,
+        total: options.length,
+        ratio: options.length ? filled / options.length : 0,
+      };
+    })
+    .sort((a, b) => b.weight - a.weight);
+  return { byOption, byCriterion };
+}
+
 export function scoreDecisionQuality(state) {
   const { criteria } = state;
   if (!criteria.length || !state.options.length) return 0;

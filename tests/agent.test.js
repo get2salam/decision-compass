@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   assessCoverage,
   buildRecommendation,
+  coverageBreakdown,
   planNextSteps,
   scoreDecisionQuality,
 } from "../js/agent.js";
@@ -212,6 +213,34 @@ test("summarizeRecommendation flows cleanly from buildRecommendation output", ()
   const summary = summarizeRecommendation(buildRecommendation(FULL_STATE));
   assert.ok(["ready", "audit", "escalate"].includes(summary.status));
   assert.equal(typeof summary.reason, "string");
+});
+
+test("coverageBreakdown reports full ratios when every cell is scored", () => {
+  const { byOption, byCriterion } = coverageBreakdown(FULL_STATE);
+  assert.ok(byOption.every((row) => row.ratio === 1 && row.filled === row.total));
+  assert.ok(byCriterion.every((row) => row.ratio === 1));
+});
+
+test("coverageBreakdown returns empty rows/columns for a fresh empty state", () => {
+  const empty = coverageBreakdown({ criteria: [], options: [], scores: {} });
+  assert.deepEqual(empty.byOption, []);
+  assert.deepEqual(empty.byCriterion, []);
+});
+
+test("coverageBreakdown counts only filled cells per option and per criterion", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7 }, o2: {} } };
+  const { byOption, byCriterion } = coverageBreakdown(partial);
+  assert.equal(byOption.find((r) => r.optionId === "o1").filled, 1);
+  assert.equal(byOption.find((r) => r.optionId === "o2").filled, 0);
+  assert.equal(byCriterion.find((r) => r.criterionId === "c1").filled, 1);
+  assert.equal(byCriterion.find((r) => r.criterionId === "c2").filled, 0);
+});
+
+test("coverageBreakdown sorts byCriterion by descending weight", () => {
+  const { byCriterion } = coverageBreakdown(FULL_STATE);
+  for (let i = 1; i < byCriterion.length; i++) {
+    assert.ok(byCriterion[i - 1].weight >= byCriterion[i].weight);
+  }
 });
 
 test("getThresholds returns configuration object with all threshold values", () => {
