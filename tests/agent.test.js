@@ -181,6 +181,32 @@ test("planNextSteps with a limit larger than the backlog returns every gap", () 
   assert.equal(planNextSteps(partial, { limit: 99 }).length, 3);
 });
 
+test("planNextSteps scoped to optionId returns only that option's gaps", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  const steps = planNextSteps(empty, { optionId: "o2" });
+  assert.equal(steps.length, 2);
+  assert.ok(steps.every((step) => step.optionId === "o2"));
+});
+
+test("planNextSteps scoped to criterionId returns only that criterion's gaps", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  const steps = planNextSteps(empty, { criterionId: "c2" });
+  assert.equal(steps.length, 2);
+  assert.ok(steps.every((step) => step.criterionId === "c2"));
+});
+
+test("planNextSteps combines optionId, criterionId, and limit filters", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  const steps = planNextSteps(empty, { optionId: "o1", criterionId: "c1", limit: 5 });
+  assert.equal(steps.length, 1);
+  assert.equal(steps[0].optionId, "o1");
+  assert.equal(steps[0].criterionId, "c1");
+});
+
+test("planNextSteps with an unknown optionId returns an empty list", () => {
+  assert.deepEqual(planNextSteps({ ...FULL_STATE, scores: {} }, { optionId: "missing" }), []);
+});
+
 test("summarizeRecommendation returns status=escalate when coverage is critically low", () => {
   const summary = summarizeRecommendation({ confidence: 60, quality: 60, coverage: 0.3 });
   assert.equal(summary.status, "escalate");

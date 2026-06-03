@@ -99,12 +99,17 @@ export function findCloseContenders(state, { threshold = 5 } = {}) {
 // Returns an ordered list of empty score cells to fill, ranked by criterion
 // weight so an orchestration loop can direct the user toward the highest-impact
 // gaps first. Pass `limit` to cap the result — useful when a loop only wants
-// the next N actions rather than the full backlog.
-export function planNextSteps(state, { limit } = {}) {
+// the next N actions rather than the full backlog. Pass `optionId` or
+// `criterionId` to scope the backlog to a single row or column, so a loop that
+// has decided to flesh out one option (or finish one criterion) can pull a
+// targeted to-do list instead of slicing the global result.
+export function planNextSteps(state, { limit, optionId, criterionId } = {}) {
   const { criteria = [], options = [], scores = {} } = state;
+  const scopedOptions = optionId ? options.filter((o) => o.id === optionId) : options;
+  const scopedCriteria = criterionId ? criteria.filter((c) => c.id === criterionId) : criteria;
   const steps = [];
-  for (const criterion of criteria) {
-    for (const option of options) {
+  for (const criterion of scopedCriteria) {
+    for (const option of scopedOptions) {
       const row = scores[option.id] ?? {};
       if (row[criterion.id] == null) {
         steps.push({
