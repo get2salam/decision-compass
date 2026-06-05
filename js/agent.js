@@ -72,6 +72,19 @@ export function scoreDecisionQuality(state) {
   );
 }
 
+// Returns the single option and criterion with the lowest coverage ratio — a
+// shortcut for orchestration loops that want to direct the user toward the
+// most-incomplete row and column without scanning coverageBreakdown by hand.
+// Criterion ties defer to byCriterion's existing weight-desc ordering, so a
+// tied weakest criterion resolves to the higher-impact one. weakestOption and
+// weakestCriterion are null when the state has no options or no criteria.
+export function findWeakestCoverage(state) {
+  const { byOption, byCriterion } = coverageBreakdown(state);
+  const minBy = (rows) =>
+    rows.reduce((min, row) => (min === null || row.ratio < min.ratio ? row : min), null);
+  return { weakestOption: minBy(byOption), weakestCriterion: minBy(byCriterion) };
+}
+
 // Returns adjacent option pairs whose normalized scores are within `threshold`
 // percentage points — useful for an orchestration loop to flag "too close to
 // call" matchups that would benefit from sharper differentiating criteria.

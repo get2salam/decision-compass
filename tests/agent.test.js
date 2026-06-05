@@ -6,6 +6,7 @@ import {
   buildRecommendation,
   coverageBreakdown,
   findCloseContenders,
+  findWeakestCoverage,
   planNextSteps,
   scoreDecisionQuality,
 } from "../js/agent.js";
@@ -268,6 +269,29 @@ test("coverageBreakdown sorts byCriterion by descending weight", () => {
   for (let i = 1; i < byCriterion.length; i++) {
     assert.ok(byCriterion[i - 1].weight >= byCriterion[i].weight);
   }
+});
+
+test("findWeakestCoverage returns null fields for an empty state", () => {
+  const w = findWeakestCoverage({ criteria: [], options: [], scores: {} });
+  assert.equal(w.weakestOption, null);
+  assert.equal(w.weakestCriterion, null);
+});
+
+test("findWeakestCoverage points to the option with the lowest coverage ratio", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7, c2: 9 } } };
+  const w = findWeakestCoverage(partial);
+  assert.equal(w.weakestOption.optionId, "o2");
+  assert.equal(w.weakestOption.ratio, 0);
+});
+
+test("findWeakestCoverage points to the criterion with the most empty cells", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7 }, o2: { c1: 8 } } };
+  assert.equal(findWeakestCoverage(partial).weakestCriterion.criterionId, "c2");
+});
+
+test("findWeakestCoverage breaks criterion ties by descending weight", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  assert.equal(findWeakestCoverage(empty).weakestCriterion.criterionId, "c1");
 });
 
 test("findCloseContenders returns empty array for a state with fewer than two options", () => {
