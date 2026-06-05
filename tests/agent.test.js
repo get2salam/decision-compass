@@ -299,6 +299,32 @@ test("findCloseContenders respects a custom threshold and returns rank metadata"
   }
 });
 
+test("findCloseContenders respects limit and keeps the highest-ranked pairs", () => {
+  const threeWay = {
+    criteria: CRITERIA,
+    options: [
+      { id: "o1", name: "Startup", note: "" },
+      { id: "o2", name: "BigCo", note: "" },
+      { id: "o3", name: "Agency", note: "" },
+    ],
+    scores: {
+      o1: { c1: 9, c2: 9 },
+      o2: { c1: 9, c2: 8 },
+      o3: { c1: 8, c2: 9 },
+    },
+  };
+  const all = findCloseContenders(threeWay);
+  assert.equal(all.length, 2);
+  const top = findCloseContenders(threeWay, { limit: 1 });
+  assert.equal(top.length, 1);
+  assert.equal(top[0].rank, 1);
+});
+
+test("findCloseContenders with limit=0 returns an empty list", () => {
+  const tight = { ...FULL_STATE, scores: { o1: { c1: 8, c2: 8 }, o2: { c1: 8, c2: 7 } } };
+  assert.deepEqual(findCloseContenders(tight, { limit: 0 }), []);
+});
+
 test("getThresholds returns configuration object with all threshold values", () => {
   const thresholds = getThresholds();
   assert.ok(thresholds.COVERAGE_CRITICAL);

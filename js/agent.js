@@ -76,8 +76,10 @@ export function scoreDecisionQuality(state) {
 // percentage points — useful for an orchestration loop to flag "too close to
 // call" matchups that would benefit from sharper differentiating criteria.
 // Pairs are returned in rank order, so the most impactful tie-break (the one
-// between the leader and runner-up) appears first.
-export function findCloseContenders(state, { threshold = 5 } = {}) {
+// between the leader and runner-up) appears first. Pass `limit` to cap the
+// result — useful when a loop only wants the top N tightest matchups (e.g.
+// just the leader-vs-runner-up pair) rather than every close pairing.
+export function findCloseContenders(state, { threshold = 5, limit } = {}) {
   const ranked = selectRankedOptions(state);
   const pairs = [];
   for (let i = 1; i < ranked.length; i++) {
@@ -93,6 +95,7 @@ export function findCloseContenders(state, { threshold = 5 } = {}) {
       });
     }
   }
+  if (typeof limit === "number" && limit >= 0) return pairs.slice(0, limit);
   return pairs;
 }
 
