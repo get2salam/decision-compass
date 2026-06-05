@@ -85,6 +85,30 @@ export function findWeakestCoverage(state) {
   return { weakestOption: minBy(byOption), weakestCriterion: minBy(byCriterion) };
 }
 
+// Returns the leading option on a single criterion plus the gap to the runner-
+// up on that same criterion — useful for an orchestration loop to answer
+// "who's strongest on the highest-weight criterion?" without scanning the
+// scores matrix by hand. Complements findCloseContenders (overall close pairs)
+// by zooming in on one column. Unscored cells are ignored; ties on raw score
+// resolve to the option seen first. Returns null when no option has been
+// scored on this criterion; `gap` is null when only one option has been scored.
+export function findCriterionLeader(state, criterionId) {
+  const { options = [], scores = {} } = state;
+  const scored = options
+    .map((opt) => ({ opt, score: (scores[opt.id] ?? {})[criterionId] }))
+    .filter((row) => row.score != null)
+    .sort((a, b) => b.score - a.score);
+  if (!scored.length) return null;
+  const [leader, runnerUp] = scored;
+  return {
+    criterionId,
+    leaderId: leader.opt.id,
+    leaderName: leader.opt.name,
+    leaderScore: leader.score,
+    gap: runnerUp ? leader.score - runnerUp.score : null,
+  };
+}
+
 // Returns adjacent option pairs whose normalized scores are within `threshold`
 // percentage points — useful for an orchestration loop to flag "too close to
 // call" matchups that would benefit from sharper differentiating criteria.

@@ -6,6 +6,7 @@ import {
   buildRecommendation,
   coverageBreakdown,
   findCloseContenders,
+  findCriterionLeader,
   findWeakestCoverage,
   planNextSteps,
   scoreDecisionQuality,
@@ -347,6 +348,37 @@ test("findCloseContenders respects limit and keeps the highest-ranked pairs", ()
 test("findCloseContenders with limit=0 returns an empty list", () => {
   const tight = { ...FULL_STATE, scores: { o1: { c1: 8, c2: 8 }, o2: { c1: 8, c2: 7 } } };
   assert.deepEqual(findCloseContenders(tight, { limit: 0 }), []);
+});
+
+test("findCriterionLeader returns null when no option has scored the criterion", () => {
+  const empty = { ...FULL_STATE, scores: {} };
+  assert.equal(findCriterionLeader(empty, "c1"), null);
+});
+
+test("findCriterionLeader returns the top-scoring option with gap to runner-up", () => {
+  const result = findCriterionLeader(FULL_STATE, "c1");
+  assert.equal(result.leaderId, "o2");
+  assert.equal(result.leaderScore, 8);
+  assert.equal(result.gap, 1);
+});
+
+test("findCriterionLeader sets gap=null when only one option has been scored", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 7 } } };
+  const result = findCriterionLeader(partial, "c1");
+  assert.equal(result.leaderId, "o1");
+  assert.equal(result.gap, null);
+});
+
+test("findCriterionLeader ignores unscored cells when ranking the column", () => {
+  const partial = { ...FULL_STATE, scores: { o1: { c1: 3 }, o2: {} } };
+  assert.equal(findCriterionLeader(partial, "c1").leaderId, "o1");
+});
+
+test("findCriterionLeader treats a score of 0 as a valid scored cell", () => {
+  const zeroed = { ...FULL_STATE, scores: { o1: { c1: 0 }, o2: {} } };
+  const result = findCriterionLeader(zeroed, "c1");
+  assert.equal(result.leaderId, "o1");
+  assert.equal(result.leaderScore, 0);
 });
 
 test("getThresholds returns configuration object with all threshold values", () => {
