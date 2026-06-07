@@ -1,5 +1,7 @@
 # Decision Compass
 
+[![Tests](https://github.com/get2salam/decision-compass/actions/workflows/test.yml/badge.svg)](https://github.com/get2salam/decision-compass/actions/workflows/test.yml)
+
 A calm local-first decision matrix for comparing options with weighted criteria.
 
 ![Decision Compass preview](docs/preview.svg)
@@ -92,13 +94,16 @@ decision-compass/
 
 ## Testing
 
-The test suite runs on the Node.js built-in test runner — no dependencies to install:
+The test suite runs on the Node.js built-in test runner — no dependencies to install. It requires Node.js 22 or newer:
 
 ```bash
-npm test
+npm test          # one-shot run
+npm run test:watch  # rerun on file changes
 ```
 
 Tests cover the pure logic in `js/` (store selectors, hydration, IO parsing, and the recommendation agent). Browser/UI code is verified by running the app locally.
+
+Every push and pull request to `main` runs the same suite on Node 22 and 24 via the [Tests workflow](.github/workflows/test.yml).
 
 ## Privacy
 
