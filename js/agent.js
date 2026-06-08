@@ -192,6 +192,16 @@ export function buildRecommendation(state) {
   const top = ranked[0];
   reasoning.push(`Leading option: "${top.name}" — ${top.normalized.toFixed(1)}% weighted score.`);
 
+  // A leader tied on weighted score with the runner-up is not a real winner —
+  // selectRankedOptions breaks the tie by name, so picking it would surface an
+  // arbitrary alphabetical choice as a confident recommendation.
+  const runnerUp = ranked[1];
+  const tiedAtTop = runnerUp && top.weightedScore === runnerUp.weightedScore;
+  if (tiedAtTop)
+    reasoning.push(
+      `"${top.name}" and "${runnerUp.name}" are tied on weighted score — add a differentiating criterion to break the tie.`,
+    );
+
   const confidence = selectConfidence(state);
   if (confidence >= 70)
     reasoning.push(`Strong confidence gap (${confidence}/100) — decision is clear.`);
@@ -202,7 +212,7 @@ export function buildRecommendation(state) {
       `Low confidence (${confidence}/100) — options are close; add differentiating criteria.`,
     );
 
-  const ready = coverage >= 0.8 && confidence >= 50 && ranked.length >= 2;
+  const ready = coverage >= 0.8 && confidence >= 50 && ranked.length >= 2 && !tiedAtTop;
   return {
     recommendation: ready ? top.name : null,
     confidence,

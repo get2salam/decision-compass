@@ -96,6 +96,43 @@ test("buildRecommendation exposes coverage so it can be piped into threshold che
   assert.equal(empty.coverage, 0);
 });
 
+test("buildRecommendation refuses to recommend a winner when leader and runner-up are tied on weighted score", () => {
+  // Regression: selectRankedOptions breaks weighted-score ties alphabetically by
+  // option name, so previously the agent would confidently surface the first
+  // option as a "recommendation" even though the ranking was arbitrary.
+  const tied = {
+    ...FULL_STATE,
+    options: [
+      { id: "o1", name: "Alpha", note: "" },
+      { id: "o2", name: "Bravo", note: "" },
+    ],
+    scores: { o1: { c1: 7, c2: 7 }, o2: { c1: 7, c2: 7 } },
+  };
+  const r = buildRecommendation(tied);
+  assert.equal(r.ready, false);
+  assert.equal(r.recommendation, null);
+  assert.ok(
+    r.reasoning.some((s) => s.includes("tied")),
+    "reasoning should mention the tie so the UI can explain it",
+  );
+});
+
+test("buildRecommendation still recommends when the leader is ahead by even a sliver", () => {
+  // Pair to the tied-leader regression: a non-zero gap should still flow
+  // through to a ready recommendation so we don't over-correct.
+  const slim = {
+    ...FULL_STATE,
+    options: [
+      { id: "o1", name: "Alpha", note: "" },
+      { id: "o2", name: "Bravo", note: "" },
+    ],
+    scores: { o1: { c1: 7, c2: 8 }, o2: { c1: 7, c2: 7 } },
+  };
+  const r = buildRecommendation(slim);
+  assert.equal(r.ready, true);
+  assert.equal(r.recommendation, "Alpha");
+});
+
 test("buildRecommendation output flows cleanly into requiresEscalation/requiresAudit", () => {
   // Regression: previously buildRecommendation omitted `coverage`, so threshold
   // checks defaulted it to 0 and always escalated even for ready recommendations.
