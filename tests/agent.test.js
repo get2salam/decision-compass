@@ -85,6 +85,23 @@ test("buildRecommendation sets ready=false when matrix coverage is below 80%", (
   assert.equal(buildRecommendation(sparse).ready, false);
 });
 
+test("buildRecommendation refuses to recommend when there is only one option", () => {
+  const solo = {
+    ...FULL_STATE,
+    options: [{ id: "o1", name: "Startup", note: "" }],
+    scores: { o1: { c1: 10, c2: 10 } },
+  };
+  const r = buildRecommendation(solo);
+  assert.equal(r.ready, false);
+  assert.equal(r.recommendation, null);
+  assert.equal(r.confidence, 0);
+  assert.equal(r.coverage, 1);
+  assert.ok(
+    r.reasoning.some((step) => step.includes("at least two options")),
+    "reasoning should explain that comparison requires another option",
+  );
+});
+
 test("buildRecommendation reasoning steps mention the highest-weight criterion label", () => {
   assert.ok(buildRecommendation(FULL_STATE).reasoning.some((s) => s.includes("Salary")));
 });

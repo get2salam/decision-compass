@@ -180,6 +180,17 @@ export function buildRecommendation(state) {
     reasoning.push("No options defined — add at least two options to compare.");
     return { recommendation: null, confidence: 0, quality: 0, coverage: 0, reasoning, ready: false };
   }
+  if (options.length < 2) {
+    reasoning.push("Only one option defined — add at least two options to compare.");
+    return {
+      recommendation: null,
+      confidence: 0,
+      quality: 0,
+      coverage: assessCoverage(state),
+      reasoning,
+      ready: false,
+    };
+  }
 
   const coverage = assessCoverage(state);
   reasoning.push(`Score coverage: ${Math.round(coverage * 100)}% of cells filled.`);
