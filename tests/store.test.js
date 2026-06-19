@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  actions,
+  getState,
   selectConfidence,
   selectOptionTotals,
   selectRankedOptions,
@@ -85,4 +87,29 @@ test("selectConfidence reflects the gap between top two options", () => {
     scores: { opt_a: { crit_x: 6 }, opt_b: { crit_x: 6 } },
   });
   assert.equal(selectConfidence(tied), 50);
+});
+
+test("store actions still update state when localStorage writes fail", () => {
+  const originalLocalStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    setItem() {
+      throw new Error("quota exceeded");
+    },
+  };
+
+  try {
+    assert.doesNotThrow(() =>
+      actions.replaceAll({
+        decisionTitle: "Storage fallback",
+        criteria: [{ id: "crit_a", label: "Impact", weight: 8 }],
+        options: [{ id: "opt_a", name: "Path A" }],
+        scores: { opt_a: { crit_a: 9 } },
+      }),
+    );
+    assert.equal(getState().decisionTitle, "Storage fallback");
+    assert.equal(getState().scores.opt_a.crit_a, 9);
+  } finally {
+    if (originalLocalStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = originalLocalStorage;
+  }
 });

@@ -16,7 +16,13 @@ function emit() {
 }
 
 function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Browsers can deny localStorage writes in private mode, strict privacy
+    // contexts, or when quota is exhausted. The app should remain usable for
+    // the current session even if persistence is unavailable.
+  }
 }
 
 function commit(next) {
