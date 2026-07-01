@@ -5,7 +5,7 @@
 import { selectConfidence, selectRankedOptions } from "./store.js";
 
 export function assessCoverage(state) {
-  const { criteria, options, scores } = state;
+  const { criteria = [], options = [], scores = {} } = state;
   if (!criteria.length || !options.length) return 0;
   let filled = 0;
   for (const opt of options) {
